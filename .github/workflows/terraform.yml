@@ -1,0 +1,118 @@
+name: Deploy terraform Demo
+permissions:
+    id-token: write # This is required for requesting the JWT
+    contents: read  # This is required for actions/checkout
+  
+on:
+    push:
+        branches:
+        - feat/runner-playground
+        paths-ignore:
+        - '**.md'
+
+    pull_request_target:
+        branches:
+        - feat/runner-playground
+        types: [labeled]
+        paths-ignore:
+        - '**.md'
+    
+    pull_request:
+        branches:
+        - feat/runner-playground
+        paths-ignore:
+        - '**.md'
+
+jobs:
+    changed_files:
+        name: 'Detect changed records'
+        # runs-on: [samprita-mac,self-hosted]
+        runs-on: ubuntu-latest
+        if: |
+            (github.event_name == 'pull_request_target' && contains(github.event.pull_request.labels.*.name, 'safe to test')) ||
+            (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+            (github.event_name == 'push')
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0  # OR "2" -> To retrieve the preceding commit.
+            - name: Get Changed files
+              id: changed-files
+              uses: tj-actions/changed-files@v39
+              with:
+                files: records/**
+                files_yaml: |
+                    domainpaths:
+                    - records/**
+                    modules:
+                    - modules/**
+                    workflows:
+                    - .github/**
+            - name: Install jq
+              uses: dcarbone/install-jq-action@v2.1.0
+            - name: Run step in module or action files change
+              id: update-all-domain-records
+              if: |
+                steps.changed-files.outputs.modules_any_changed == 'true' || steps.changed-files.outputs.workflows_any_changed == 'true'
+              run: |
+                domain_zones=()
+                for file in $(ls records); do
+                  domain_zones+=(records/$file)
+                done
+                domain_paths=$(jq -c -n '$ARGS.positional' --args ${domain_zones[@]})
+                echo "$domain_paths"
+                echo "domain_paths={\"domain\": $domain_paths}" >> $GITHUB_OUTPUT
+                
+            - name: Run step if any file(s) in the records folder change
+              id: get-changed-domain-records
+              if: steps.changed-files.outputs.any_changed == 'true'
+              run: |
+                #! /bin/bash -x
+                if [ ${{steps.changed-files.outputs.modules_any_changed}} == 'true' ]; then
+                echo "domain_paths=${{steps.update-all-domain-records.outputs.domain_paths}}" >> $GITHUB_OUTPUT
+                elif ${{steps.changed-files.outputs.domainpaths_any_changed}} == 'true'
+                    changed_domain_zones=()
+                    for file in ${{steps.changed-files.outputs.domainpaths_all_changed_files}}; do
+                        echo "$file was changed"
+                        echo "Directory is $(dirname $file)"
+                        changed_domain_zones+=($(dirname $file))
+                    done
+                    unique_changed_domains=($(printf "%s\n" "${changed_domain_zones[@]}" | sort -u))
+                    domain_paths=$(jq -c -n '$ARGS.positional' --args $unique_changed_domains)
+                    echo "domain_paths={\"domain\": $domain_paths}" >> $GITHUB_OUTPUT
+                else
+                    echo "domain_paths={\"domain\": []}" >> $GITHUB_OUTPUT
+                fi
+                  
+
+        outputs:
+            domains:  ${{steps.get-changed-domain-records.outputs.domain_paths}}
+            changed_files: ${{steps.changed-files.outputs.any_changed}}
+
+    terraform_plan:
+        runs-on: ubuntu-latest
+        needs: changed_files
+        if: needs.changed_files.outputs.changed_files == 'true'
+        strategy:
+            max-parallel: 1  # assuming they should run in series
+            matrix: ${{fromJSON(needs.changed_files.outputs.domains)}} 
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+            - name: test path contents
+              run: |
+                pwd
+                ls -ltarh
+            - name: terraform-plan
+              id: terraform-plan
+              uses: ./.github/actions/terraform_action
+              if: ${{needs.changed_files.outputs.changed_files}} == 'true'
+              with:
+                operation: plan
+                iam_role_arn: arn:aws:iam::195368226277:role/gitops-terraform-demo-role
+                domain_path: ${{matrix.domain}}
+                aws_region: "us-east-1"
+

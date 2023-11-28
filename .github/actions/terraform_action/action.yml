@@ -1,0 +1,63 @@
+name: "Terraform Action"
+descriptions: "Terraform operations"
+inputs:
+  operation:
+    description: "Whether the job should apply after plan"
+    required: true
+    default: 'plan'
+  iam_role_arn:
+    description: "IAM Role ARN for OIDC authentication"
+    required: true
+  domain_path:
+    description: "name of the domain who records needs to be deployed"
+    required: true
+  aws_region: 
+    description: "Region where state bucket and dynamodb table exists"
+    required: true
+  
+
+runs:
+  using: "composite"
+  steps:
+  - name: Configure AWS credentials
+    uses: aws-actions/configure-aws-credentials@v4
+    with:
+      role-to-assume: ${{inputs.iam_role_arn}}
+      aws-region: ${{inputs.aws_region}}
+  - uses: hashicorp/setup-terraform@v2
+    with:
+      terraform_version: "1.6.4"
+  - name: Terraform Plan
+    working-directory: ${{inputs.domain_path}}
+    run: |
+      set -x
+      if [ ${{ inputs.operation  }} = "plan" ]; then
+        terraform init -reconfigure
+        terraform validate
+        terraform plan -lock=false -input=false
+      fi
+    shell: bash
+  - name: Terraform apply
+    working-directory: ${{inputs.domain_path}}
+    run: |
+      if [ ${{ inputs.operation  }} = "apply" ]; then
+        echo "Running terraform apply..."
+        terraform --version
+        terraform init -reconfigure
+        terraform apply -auto-approve -input=false
+      else
+        echo "Bypassing Terraform apply..."
+      fi
+    shell: bash
+  - name: Terraform destroy
+    working-directory: ${{inputs.domain_path}}
+    run: |
+      if [ ${{ inputs.operation  }} = "destroy" ]; then
+        echo "Running terraform destroy..."
+        terraform --version
+        terraform init -reconfigure
+        terraform apply -auto-approve -input=false -destroy
+      else
+        echo "Bypassing Terraform apply..."
+      fi
+    shell: bash
