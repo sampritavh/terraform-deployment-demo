@@ -1,2 +1,2 @@
-# terraform-deployment-demo
-terraform-deployment-demo
+# Overview
+This repository contains the code to demonstrate infrastructure deployment with Terraform and GitHub actions. 
