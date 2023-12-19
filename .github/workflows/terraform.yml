@@ -99,7 +99,7 @@ jobs:
         steps:
         - name: Test previous job outputs
           run: |
-            echo "${{needs.changed_files.outputs.if_changed_files}} - changed_files"
+            echo " ${{needs.changed_files.outputs.if_changed_files}} "
             echo "Domains: ${{needs.changed_files.outputs.domains}}"
 
     terraform_plan:
