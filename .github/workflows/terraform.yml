@@ -59,6 +59,7 @@ jobs:
               run: |
                 #! /bin/bash -x
                 if [ ${{steps.changed-files.outputs.modules_any_changed}} == 'true' || ${{steps.changed-files.outputs.workflows_any_changed}} == 'true' ]; then
+                    echo "Adding all hosted zones"
                     domain_zones=()
                     for file in $(ls records); do
                       domain_zones+=(records/$file)
