@@ -86,7 +86,10 @@ jobs:
 
         outputs:
             domains:  ${{steps.get-changed-domain-records.outputs.domain_paths}}
-            changed_files: ${{steps.get-changed-domain-records.changed_files}}
+            changed_files: |
+              ${{steps.changed-files.outputs.domainpaths_any_changed}} || 
+              ${{steps.changed-files.outputs.modules_any_changed}} ||
+              ${{steps.changed-files.outputs.workflows_any_changed}}
 
     terraform_plan:
         runs-on: ubuntu-latest
