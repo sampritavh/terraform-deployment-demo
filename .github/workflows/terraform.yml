@@ -52,7 +52,10 @@ jobs:
               uses: dcarbone/install-jq-action@v2.1.0
             - name: Run step if any file(s) in the records folder change
               id: get-changed-domain-records
-              if: steps.changed-files.outputs.any_changed == 'true'
+              if: |
+              (steps.changed-files.outputs.domainpaths_any_changed == 'true') ||
+              (steps.changed-files.outputs.modules_any_changed == 'true') ||
+              (steps.changed-files.outputs.workflows_any_changed == 'true') )
               run: |
                 #! /bin/bash -x
                 if [ ${{steps.changed-files.outputs.modules_any_changed}} == 'true' || ${{steps.changed-files.outputs.workflows_any_changed}} == 'true' ]; then
