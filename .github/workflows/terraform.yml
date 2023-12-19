@@ -69,8 +69,14 @@ jobs:
               if: steps.changed-files.outputs.any_changed == 'true'
               run: |
                 #! /bin/bash -x
-                if [ ${{steps.changed-files.outputs.modules_any_changed}} == 'true' ]; then
-                echo "domain_paths=${{steps.update-all-domain-records.outputs.domain_paths}}" >> $GITHUB_OUTPUT
+                if [ ${{steps.changed-files.outputs.modules_any_changed}} == 'true' || ${{steps.changed-files.outputs.workflows_any_changed}} == 'true' ]; then
+                    domain_zones=()
+                    for file in $(ls records); do
+                      domain_zones+=(records/$file)
+                    done
+                    domain_paths=$(jq -c -n '$ARGS.positional' --args ${domain_zones[@]})
+                    echo "$domain_paths"
+                    echo "domain_paths={\"domain\": $domain_paths}" >> $GITHUB_OUTPUT
                 elif ${{steps.changed-files.outputs.domainpaths_any_changed}} == 'true'
                     changed_domain_zones=()
                     for file in ${{steps.changed-files.outputs.domainpaths_all_changed_files}}; do
