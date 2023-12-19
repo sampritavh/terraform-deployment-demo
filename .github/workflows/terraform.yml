@@ -92,15 +92,12 @@ jobs:
 
         outputs:
             domains:  ${{steps.get-changed-domain-records.outputs.domain_paths}}
-            if_chnaged_files: |
-              ${{steps.changed-files.outputs.domainpaths_any_changed}} == 'true' || 
-              ${{steps.changed-files.outputs.modules_any_changed}} == 'true' ||
-              ${{steps.changed-files.outputs.workflows_any_changed}} == 'true'
+            if_changed_files: ${{steps.changed-files.outputs.any_changed}}"
 
     terraform_plan:
         runs-on: ubuntu-latest
         needs: changed_files
-        if: needs.changed_files.outputs.if_chnaged_files == 'true'
+        if: needs.changed_files.outputs.if_changed_files == 'true'
         strategy:
             max-parallel: 1  # assuming they should run in series
             matrix: ${{fromJSON(needs.changed_files.outputs.domains)}} 
@@ -116,7 +113,7 @@ jobs:
             - name: terraform-plan
               id: terraform-plan
               uses: ./.github/actions/terraform_action
-              if: ${{needs.changed_files.outputs.changed_files}} == 'true'
+              if: ${{needs.changed_files.outputs.if_changed_files}} == 'true'
               with:
                 operation: plan
                 iam_role_arn: arn:aws:iam::195368226277:role/gitops-terraform-demo-role
