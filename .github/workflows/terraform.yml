@@ -53,9 +53,9 @@ jobs:
             - name: Run step if any file(s) in the records folder change
               id: get-changed-domain-records
               if: |
-              (steps.changed-files.outputs.domainpaths_any_changed == 'true') ||
-              (steps.changed-files.outputs.modules_any_changed == 'true') ||
-              (steps.changed-files.outputs.workflows_any_changed == 'true') )
+                (steps.changed-files.outputs.domainpaths_any_changed == 'true') ||
+                (steps.changed-files.outputs.modules_any_changed == 'true') ||
+                (steps.changed-files.outputs.workflows_any_changed == 'true')
               run: |
                 #! /bin/bash -x
                 if [ ${{steps.changed-files.outputs.modules_any_changed}} == 'true' || ${{steps.changed-files.outputs.workflows_any_changed}} == 'true' ]; then
