@@ -62,7 +62,6 @@ jobs:
                 (steps.changed-files.outputs.workflows_any_changed == 'true')
               run: |
                 #! /bin/bash -x
-                echo "Has any file changed ?  ${{steps.changed-files.outputs.any_changed}}"
                 if [[ ${{steps.changed-files.outputs.modules_any_changed}} == 'true' || ${{steps.changed-files.outputs.workflows_any_changed}} == 'true' ]]; then
                     echo "Adding all hosted zones"
                     domain_zones=()
@@ -72,7 +71,6 @@ jobs:
                     domain_paths=$(jq -c -n '$ARGS.positional' --args ${domain_zones[@]})
                     echo "$domain_paths"
                     echo "domain_paths={\"domain\": $domain_paths}" >> $GITHUB_OUTPUT
-                    echo "changed_files=true" >> $GITHUB_OUTPUT
                 elif [ ${{steps.changed-files.outputs.domainpaths_any_changed}} == 'true' ]; then
                     changed_domain_zones=()
                     for file in ${{steps.changed-files.outputs.domainpaths_all_changed_files}}; do
@@ -86,7 +84,6 @@ jobs:
                     echo "changed_files=true" >> $GITHUB_OUTPUT
                 else
                     echo "domain_paths={\"domain\": []}" >> $GITHUB_OUTPUT
-                    echo "changed_files=false" >> $GITHUB_OUTPUT
                 fi
                   
 
