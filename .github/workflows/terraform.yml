@@ -77,7 +77,7 @@ jobs:
                     domain_paths=$(jq -c -n '$ARGS.positional' --args ${domain_zones[@]})
                     echo "$domain_paths"
                     echo "domain_paths={\"domain\": $domain_paths}" >> $GITHUB_OUTPUT
-                elif ${{steps.changed-files.outputs.domainpaths_any_changed}} == 'true'
+                elif [ ${{steps.changed-files.outputs.domainpaths_any_changed}} == 'true' ]; then
                     changed_domain_zones=()
                     for file in ${{steps.changed-files.outputs.domainpaths_all_changed_files}}; do
                         echo "$file was changed"
