@@ -1,4 +1,4 @@
-# variables 25
+# variables 26
 locals {
   domain_name = "domain2.example.com"
   non_alias_records = [
