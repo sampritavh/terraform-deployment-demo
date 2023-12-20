@@ -81,7 +81,7 @@ jobs:
                     echo "changed_domain_zones  ${changed_domain_zones[@]}"
                     unique_changed_domains=($(printf "%s\n" "${changed_domain_zones[@]}" | sort -u))
                     echo "Unique changed domains ${unique_changed_domains[@]}"
-                    domain_paths=$(jq -c -n '$ARGS.positional' --args $unique_changed_domains)
+                    domain_paths=$(jq -c -n '$ARGS.positional' --args ${unique_changed_domains[@]})
                     echo "domain_paths={\"domain\": $domain_paths}" >> $GITHUB_OUTPUT
                     echo "$domain_paths"
                 else
