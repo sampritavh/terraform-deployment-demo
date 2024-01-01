@@ -58,6 +58,6 @@ runs:
         terraform init -reconfigure
         terraform apply -auto-approve -input=false -destroy
       else
-        echo "Bypassing Terraform apply..."
+        echo "Bypassing Terraform destroy..."
       fi
     shell: bash
