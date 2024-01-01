@@ -116,7 +116,7 @@ jobs:
 
     deployment:
         runs-on: ubuntu-latest
-        needs: changed_files
+        needs: [changed_files,terraform_plan]
         if: needs.changed_files.outputs.if_changed_files == 'true'
         strategy:
             max-parallel: 1  # assuming they should run in series
@@ -140,7 +140,7 @@ jobs:
                 aws_region: "us-east-1"
     cleanup:
       runs-on: ubuntu-latest
-      needs: changed_files
+      needs: [changed_files,deployment] 
       if: needs.changed_files.outputs.if_changed_files == 'true'
       strategy:
           max-parallel: 1  # assuming they should run in series
