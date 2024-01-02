@@ -1,6 +1,6 @@
 # variables 4
 locals {
-  domain_name = "domain2.example.com"
+  domain_name = "domain2.githubactions-demo.com"
   non_alias_records = [
     {
       name    = "test1"
