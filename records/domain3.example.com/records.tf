@@ -13,6 +13,7 @@ locals {
     },
 
   ]
+  /*
   alias_records = [
     {
       name = "testing-alias1"
@@ -22,4 +23,5 @@ locals {
       }
     }
   ]
+  */
 }
