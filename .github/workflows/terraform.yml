@@ -6,27 +6,26 @@ permissions:
 on:
     push:
         branches:
-        - feat/runner-playground
+        - feat/deployment-test
         paths-ignore:
         - '**.md'
 
     pull_request_target:
         branches:
-        - feat/runner-playground
+        - feat/deployment-test
         types: [labeled]
         paths-ignore:
         - '**.md'
     
     pull_request:
         branches:
-        - feat/runner-playground
+        - feat/deployment-test
         paths-ignore:
         - '**.md'
 
 jobs:
     changed_files:
         name: 'Detect changed records'
-        # runs-on: [samprita-mac,self-hosted]
         runs-on: ubuntu-latest
         if: |
             (github.event_name == 'pull_request_target' && contains(github.event.pull_request.labels.*.name, 'safe to test')) ||
@@ -153,8 +152,8 @@ jobs:
             uses: actions/checkout@v4
             with:
               fetch-depth: 0
-          - name: terraform-deploy
-            id: terraform-deploy
+          - name: terraform-destroy
+            id: terraform-destroy
             uses: ./.github/actions/terraform_action
             if: ${{needs.changed_files.outputs.if_changed_files}} == 'true'
             with:

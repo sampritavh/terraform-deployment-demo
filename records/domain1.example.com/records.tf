@@ -1,6 +1,6 @@
 # ## test 3
 locals {
-  domain_name = "domain1.example.com"
+  domain_name = "domain1.githubactions-demo.com"
   non_alias_records = [
     {
       name    = "test1"
@@ -14,6 +14,8 @@ locals {
     },
 
   ]
+  alias_records = []
+  /*
   alias_records = [
     {
       name = "testing-alias1"
@@ -23,4 +25,5 @@ locals {
       }
     }
   ]
+  */
 }
