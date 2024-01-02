@@ -13,6 +13,7 @@ locals {
     },
 
   ]
+  alias_records = []
   /*
   alias_records = [
     {
