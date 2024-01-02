@@ -6,20 +6,20 @@ permissions:
 on:
     push:
         branches:
-        - main
+        - feat/deployment-test
         paths-ignore:
         - '**.md'
 
     pull_request_target:
         branches:
-        - main
+        - feat/deployment-test
         types: [labeled]
         paths-ignore:
         - '**.md'
     
     pull_request:
         branches:
-        - main
+        - feat/deployment-test
         paths-ignore:
         - '**.md'
 
